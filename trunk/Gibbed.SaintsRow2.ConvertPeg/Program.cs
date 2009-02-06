@@ -10,60 +10,47 @@ namespace Gibbed.SaintsRow2.ConvertPeg
 {
 	class Program
 	{
-		private static Bitmap MakeBitmapFromData(uint width, uint height, byte[] buffer, bool keepAlpha)
+		private static Bitmap MakeBitmapFromDXT(uint width, uint height, byte[] buffer, bool keepAlpha)
 		{
-			byte[] myBuffer = (byte[])buffer.Clone();
 			Bitmap bitmap = new Bitmap((int)width, (int)height, PixelFormat.Format32bppArgb);
 
 			for (uint i = 0; i < width * height * 4; i += 4)
 			{
-				byte v = myBuffer[i + 0];
-				myBuffer[i + 0] = buffer[i + 2];
-				myBuffer[i + 2] = v;
-				if (keepAlpha == false)
-				{
-					myBuffer[i + 3] = 0xFF;
-				}
+				// flip red and blue
+				byte r = buffer[i + 0];
+				buffer[i + 0] = buffer[i + 2];
+				buffer[i + 2] = r;
 			}
 
 			Rectangle area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
 			BitmapData data = bitmap.LockBits(area, ImageLockMode.WriteOnly, bitmap.PixelFormat);
-			Marshal.Copy(myBuffer, 0, data.Scan0, (int)(width * height * 4));
+			Marshal.Copy(buffer, 0, data.Scan0, (int)(width * height * 4));
 			bitmap.UnlockBits(data);
 			return bitmap;
 		}
 
 		private static Bitmap MakeBitmapFromR5G6B5(uint width, uint height, byte[] buffer)
 		{
-			byte[] myBuffer = (byte[])buffer.Clone();
 			Bitmap bitmap = new Bitmap((int)width, (int)height, PixelFormat.Format16bppRgb565);
-
 			Rectangle area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
 			BitmapData data = bitmap.LockBits(area, ImageLockMode.WriteOnly, bitmap.PixelFormat);
-			Marshal.Copy(myBuffer, 0, data.Scan0, (int)(width * height * 2));
+			Marshal.Copy(buffer, 0, data.Scan0, (int)(width * height * 2));
 			bitmap.UnlockBits(data);
 			return bitmap;
 		}
 
 		private static Bitmap MakeBitmapFromA8R8G8B8(uint width, uint height, byte[] buffer)
 		{
-			byte[] myBuffer = (byte[])buffer.Clone();
 			Bitmap bitmap = new Bitmap((int)width, (int)height, PixelFormat.Format32bppArgb);
 			Rectangle area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
 			BitmapData data = bitmap.LockBits(area, ImageLockMode.WriteOnly, bitmap.PixelFormat);
-			Marshal.Copy(myBuffer, 0, data.Scan0, (int)(width * height * 4));
+			Marshal.Copy(buffer, 0, data.Scan0, (int)(width * height * 4));
 			bitmap.UnlockBits(data);
 			return bitmap;
 		}
 
-		public static void Main(string[] args)
+		private static void Convert(string pegName)
 		{
-			if (args.Length == 0)
-			{
-				return;
-			}
-
-			string pegName = args[0];
 			if (File.Exists(pegName) == false)
 			{
 				Console.WriteLine("{0} does not exist.", pegName);
@@ -85,51 +72,78 @@ namespace Gibbed.SaintsRow2.ConvertPeg
 
 			foreach (FileFormats.PegEntry entry in peg.Entries)
 			{
-				data.Seek(entry.Offset, SeekOrigin.Begin);
-				byte[] compressed = new byte[entry.Size];
-				data.Read(compressed, 0, (int)entry.Size);
+				int index = 0;
+				foreach (FileFormats.PegFrame frame in entry.Frames)
+				{
+					data.Seek(frame.Offset, SeekOrigin.Begin);
+					byte[] compressed = new byte[frame.Size];
+					data.Read(compressed, 0, (int)frame.Size);
 
-				// DXT
-				if (entry.Format == FileFormats.PegFormat.DXT1 ||
-					entry.Format == FileFormats.PegFormat.DXT3 ||
-					entry.Format == FileFormats.PegFormat.DXT5)
-				{
-					Squish.Flags flags = 0;
+					FileFormats.PegFormat format = (FileFormats.PegFormat)frame.Format;
 
-					if (entry.Format == FileFormats.PegFormat.DXT1)
+					Bitmap bitmap;
+
+					// DXT
+					if (format == FileFormats.PegFormat.DXT1 ||
+						format == FileFormats.PegFormat.DXT3 ||
+						format == FileFormats.PegFormat.DXT5)
 					{
-						flags |= Squish.Flags.DXT1;
+						Squish.Flags flags = 0;
+
+						if (format == FileFormats.PegFormat.DXT1)
+						{
+							flags |= Squish.Flags.DXT1;
+						}
+						else if (format == FileFormats.PegFormat.DXT3)
+						{
+							flags |= Squish.Flags.DXT3;
+						}
+						else if (format == FileFormats.PegFormat.DXT5)
+						{
+							flags |= Squish.Flags.DXT5;
+						}
+
+						byte[] decompressed = new byte[frame.Width * frame.Height * 4];
+						Squish.Decompress(decompressed, frame.Width, frame.Height, compressed, (int)flags);
+						bitmap = MakeBitmapFromDXT(frame.Width, frame.Height, decompressed, true);
 					}
-					else if (entry.Format == FileFormats.PegFormat.DXT3)
+					// R5G6B5
+					else if (format == FileFormats.PegFormat.R5G6B5)
 					{
-						flags |= Squish.Flags.DXT3;
+						bitmap = MakeBitmapFromR5G6B5(frame.Width, frame.Height, compressed);
 					}
-					else if (entry.Format == FileFormats.PegFormat.DXT5)
+					// A8R8G8B8
+					else if (format == FileFormats.PegFormat.A8R8G8B8)
 					{
-						flags |= Squish.Flags.DXT5;
+						bitmap = MakeBitmapFromA8R8G8B8(frame.Width, frame.Height, compressed);
+					}
+					else
+					{
+						throw new Exception("unhandled format " + frame.Format.ToString());
 					}
 
-					byte[] decompressed = new byte[entry.Width * entry.Height * 4];
-					Squish.Decompress(decompressed, entry.Width, entry.Height, compressed, (int)flags);
-					Bitmap bitmap = MakeBitmapFromData(entry.Width, entry.Height, decompressed, true);
-					bitmap.Save(Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
+					if (entry.Frames.Count == 1)
+					{
+						bitmap.Save(Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
+					}
+					else
+					{
+						string name = Path.GetFileNameWithoutExtension(entry.Name);
+						name += " (frame " + index.ToString() + ")";
+
+						bitmap.Save(Path.ChangeExtension(name, ".png"), ImageFormat.Png);
+					}
+
+					index++;
 				}
-				// R5G6B5
-				else if (entry.Format == FileFormats.PegFormat.R5G6B5)
-				{
-					Bitmap bitmap = MakeBitmapFromR5G6B5(entry.Width, entry.Height, compressed);
-					bitmap.Save(Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
-				}
-				// A8R8G8B8
-				else if (entry.Format == FileFormats.PegFormat.A8R8G8B8)
-				{
-					Bitmap bitmap = MakeBitmapFromA8R8G8B8(entry.Width, entry.Height, compressed);
-					bitmap.Save(Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
-				}
-				else
-				{
-					throw new Exception("unhandled format " + entry.Format.ToString());
-				}
+			}
+		}
+
+		public static void Main(string[] args)
+		{
+			foreach (string path in Directory.GetFiles(".", "*.peg_pc"))
+			{
+				Convert(path);
 			}
 		}
 	}

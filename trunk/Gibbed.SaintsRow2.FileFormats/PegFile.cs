@@ -13,8 +13,15 @@ namespace Gibbed.SaintsRow2.FileFormats
 
 		public UInt32 FileSize;
 		public UInt32 Unknown0C;
-		public UInt32 Unknown10;
+		public UInt16 Unknown12;
 		public UInt32 Unknown16;
+
+		public PegFrame ReadFrame(Stream stream)
+		{
+			byte[] data = new byte[0x30];
+			stream.Read(data, 0, 0x30);
+			return (PegFrame)data.BytesToStructure(typeof(PegFrame));
+		}
 
 		public void Read(Stream stream)
 		{
@@ -38,27 +45,53 @@ namespace Gibbed.SaintsRow2.FileFormats
 			}
 
 			this.Unknown0C = stream.ReadU32();
-			this.Unknown10 = stream.ReadU32();
-			int count = stream.ReadU16();
+			int entryCount = stream.ReadU16();
+			this.Unknown12 = stream.ReadU16();
+			int frameCount = stream.ReadU16();
 			this.Unknown16 = stream.ReadU16();
 
 			// Read names
-			string[] names = new string[count];
-			stream.Seek(0x18 + (0x30 * count), SeekOrigin.Begin);
-			for (int i = 0; i < count; i++)
+			string[] names = new string[entryCount];
+			stream.Seek(0x18 + (0x30 * frameCount), SeekOrigin.Begin);
+			for (int i = 0; i < entryCount; i++)
 			{
 				names[i] = stream.ReadASCIIZ();
 			}
 
+			int totalFrames = 0;
+
 			// Read entries
 			stream.Seek(0x18, SeekOrigin.Begin);
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < entryCount; i++)
 			{
-				byte[] data = new byte[0x30];
-				stream.Read(data, 0, 0x30);
-				PegEntry entry = new PegEntry((PegEntryData)data.BytesToStructure(typeof(PegEntryData)));
+				PegEntry entry = new PegEntry();
 				entry.Name = names[i];
+
+				PegFrame frame = this.ReadFrame(stream);
+				entry.Frames.Add(frame);
+				totalFrames++;
+
+				if (frame.Frames == 0)
+				{
+					throw new Exception("frame count is 0");
+				}
+				else if (frame.Frames > 1)
+				{
+					// The first frame of a peg will say how many frames are in the image,
+					// all subsequent frames have 1 for the frame count.
+					for (int j = 1; j < frame.Frames; j++)
+					{
+						entry.Frames.Add(this.ReadFrame(stream));
+						totalFrames++;
+					}
+				}
+
 				this.Entries.Add(entry);
+			}
+
+			if (totalFrames != frameCount)
+			{
+				throw new Exception("something bad happened");
 			}
 		}
 	}
