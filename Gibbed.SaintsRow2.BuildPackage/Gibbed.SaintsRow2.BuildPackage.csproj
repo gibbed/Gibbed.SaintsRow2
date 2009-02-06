@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DC2D90ED-A075-4B6A-AB8A-498EFFF76561}</ProjectGuid>
+    <ProjectGuid>{E1098B4F-497B-464E-8452-2F5F7E491A96}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gibbed.SaintsRow2.Tester</RootNamespace>
-    <AssemblyName>Gibbed.SaintsRow2.Tester</AssemblyName>
+    <RootNamespace>Gibbed.SaintsRow2.BuildPackage</RootNamespace>
+    <AssemblyName>Gibbed.SaintsRow2.BuildPackage</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -47,16 +47,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Gibbed.SaintsRow2.FileFormats\Gibbed.SaintsRow2.FileFormats.csproj">
-      <Project>{99467BAB-01BD-4F91-A9DA-F662674ADFE8}</Project>
-      <Name>Gibbed.SaintsRow2.FileFormats</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Gibbed.SaintsRow2.Helpers\Gibbed.SaintsRow2.Helpers.csproj">
-      <Project>{CC72B954-00C2-4399-A8DD-D30C198FFE1C}</Project>
-      <Name>Gibbed.SaintsRow2.Helpers</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

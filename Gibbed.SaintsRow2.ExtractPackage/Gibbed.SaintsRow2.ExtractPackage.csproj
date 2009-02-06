@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -81,9 +81,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Gibbed.SaintsRow2.Package\Gibbed.SaintsRow2.Package.csproj">
-      <Project>{A9DA3EDA-3D09-40A5-8AAF-AFBA0067606F}</Project>
-      <Name>Gibbed.SaintsRow2.Package</Name>
+    <ProjectReference Include="..\Gibbed.SaintsRow2.FileFormats\Gibbed.SaintsRow2.FileFormats.csproj">
+      <Project>{99467BAB-01BD-4F91-A9DA-F662674ADFE8}</Project>
+      <Name>Gibbed.SaintsRow2.FileFormats</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

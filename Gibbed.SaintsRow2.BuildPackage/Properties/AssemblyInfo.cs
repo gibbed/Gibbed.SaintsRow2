@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Gibbed.SaintsRow2.Package")]
+[assembly: AssemblyTitle("Gibbed.SaintsRow2.BuildPackage")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Gibbed.SaintsRow2.Package")]
+[assembly: AssemblyProduct("Gibbed.SaintsRow2.BuildPackage")]
 [assembly: AssemblyCopyright("Copyright ©  2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4fe476de-6a60-4f5a-aa93-ed35ce486d1a")]
+[assembly: Guid("27e5133c-c58e-4ad4-bfa4-60a4147c6c34")]
 
 // Version information for an assembly consists of the following four values:
 //
