@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Gibbed.SaintsRow2.FileFormats
@@ -21,52 +22,12 @@ namespace Gibbed.SaintsRow2.FileFormats
 
 	public class PegEntry
 	{
-		public PegEntryData Data;
 		public string Name;
-
-		public PegEntry()
-		{
-			this.Data = new PegEntryData();
-		}
-
-		public PegEntry(PegEntryData data)
-		{
-			this.Data = data;
-		}
-
-		public UInt32 Offset
-		{
-			get { return this.Data.Offset; }
-			set { this.Data.Offset = value; }
-		}
-
-		public UInt16 Width
-		{
-			get { return this.Data.Width; }
-			set { this.Data.Width = value; }
-		}
-
-		public UInt16 Height
-		{
-			get { return this.Data.Height; }
-			set { this.Data.Height = value; }
-		}
-
-		public PegFormat Format
-		{
-			get { return (PegFormat)this.Data.Format; }
-			set { this.Data.Format = (uint)value; }
-		}
-
-		public UInt32 Size
-		{
-			get { return this.Data.Size; }
-			set { this.Data.Size = value; }
-		}
+		public List<PegFrame> Frames = new List<PegFrame>();
 	}
 
 	[StructLayout(LayoutKind.Explicit, Size = 0x30)]
-	public struct PegEntryData
+	public struct PegFrame
 	{
 		[FieldOffset(0x00)]
 		public UInt32 Offset;
@@ -99,7 +60,10 @@ namespace Gibbed.SaintsRow2.FileFormats
 		public UInt32 Unknown0C;
 
 		[FieldOffset(0x10)]
-		public UInt32 Unknown10;
+		public UInt16 Frames;
+
+		[FieldOffset(0x12)]
+		public UInt16 Unknown12;
 
 		[FieldOffset(0x14)]
 		public UInt32 Unknown14; // used for a pointer to the string by game
