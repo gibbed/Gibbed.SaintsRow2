@@ -77,8 +77,10 @@ namespace Gibbed.SaintsRow2.FileFormats
 				}
 				else if (frame.Frames > 1)
 				{
-					// The first frame of a peg will say how many frames are in the image,
-					// all subsequent frames have 1 for the frame count.
+					/* The first frame of a peg will say how many frames are in the
+					 * image (including itself), all subsequent frames have 1 for the
+					 * frame count.
+					 */
 					for (int j = 1; j < frame.Frames; j++)
 					{
 						entry.Frames.Add(this.ReadFrame(stream));
