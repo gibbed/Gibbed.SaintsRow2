@@ -122,16 +122,18 @@ namespace Gibbed.SaintsRow2.ConvertPeg
 						throw new Exception("unhandled format " + frame.Format.ToString());
 					}
 
+					string prefix = Path.ChangeExtension(pegName, null) + "   ";
+
 					if (entry.Frames.Count == 1)
 					{
-						bitmap.Save(Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
+						bitmap.Save(prefix + Path.ChangeExtension(entry.Name, ".png"), ImageFormat.Png);
 					}
 					else
 					{
 						string name = Path.GetFileNameWithoutExtension(entry.Name);
 						name += " (frame " + index.ToString() + ")";
 
-						bitmap.Save(Path.ChangeExtension(name, ".png"), ImageFormat.Png);
+						bitmap.Save(prefix + Path.ChangeExtension(name, ".png"), ImageFormat.Png);
 					}
 
 					index++;
