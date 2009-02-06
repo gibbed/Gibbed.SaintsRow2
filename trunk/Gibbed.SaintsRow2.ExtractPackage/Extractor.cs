@@ -2,7 +2,7 @@
 using System.Threading;
 using System.IO;
 using System.Windows.Forms;
-using Gibbed.SaintsRow2.Package;
+using Gibbed.SaintsRow2.FileFormats;
 
 namespace Gibbed.SaintsRow2.ExtractPackage
 {
