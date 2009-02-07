@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Gibbed.SaintsRow2.FileFormats;
-using Gibbed.SaintsRow2.Helpers;
-using System.Xml;
 
 namespace Gibbed.SaintsRow2.Tester
 {

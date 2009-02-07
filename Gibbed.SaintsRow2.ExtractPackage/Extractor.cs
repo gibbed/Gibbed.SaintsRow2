@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Threading;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using Gibbed.SaintsRow2.FileFormats;
 
