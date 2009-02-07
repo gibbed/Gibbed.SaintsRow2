@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.IO;
-using System.Text;
 using Gibbed.SaintsRow2.Helpers;
 
 namespace Gibbed.SaintsRow2.FileFormats

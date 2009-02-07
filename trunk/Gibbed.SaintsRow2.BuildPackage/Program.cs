@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Windows.Forms;
 using Gibbed.SaintsRow2.FileFormats;
 using Gibbed.SaintsRow2.Helpers;
 
@@ -16,6 +16,12 @@ namespace Gibbed.SaintsRow2.BuildPackage
 	{
 		static void Main(string[] args)
 		{
+			if (args.Length < 2)
+			{
+				Console.WriteLine("{0} <package.vpp_pc> <directory> [<directory>[, <directory>[, ...]]]", Path.GetFileName(Application.ExecutablePath));
+				return;
+			}
+
 			Dictionary<string, MyPackageEntry> files = new Dictionary<string, MyPackageEntry>();
 			Stream stream = File.Create(args[0]);
 

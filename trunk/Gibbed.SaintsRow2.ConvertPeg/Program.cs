@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Gibbed.SaintsRow2.ConvertPeg
 {
@@ -143,7 +142,23 @@ namespace Gibbed.SaintsRow2.ConvertPeg
 
 		public static void Main(string[] args)
 		{
-			foreach (string path in Directory.GetFiles(".", "*.peg_pc"))
+			string directory;
+
+			if (args.Length == 0)
+			{
+				directory = ".";
+			}
+			else if (args.Length == 1)
+			{
+				directory = args[1];
+			}
+			else
+			{
+				Console.WriteLine("{0} [directory with peg files]", Path.GetFileName(Application.ExecutablePath));
+				return;
+			}
+
+			foreach (string path in Directory.GetFiles(Path.GetFullPath(directory), "*.peg_pc"))
 			{
 				Convert(path);
 			}
