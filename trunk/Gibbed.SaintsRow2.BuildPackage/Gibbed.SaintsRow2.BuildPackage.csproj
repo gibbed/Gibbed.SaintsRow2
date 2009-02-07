@@ -48,6 +48,16 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gibbed.SaintsRow2.FileFormats\Gibbed.SaintsRow2.FileFormats.csproj">
+      <Project>{99467BAB-01BD-4F91-A9DA-F662674ADFE8}</Project>
+      <Name>Gibbed.SaintsRow2.FileFormats</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Gibbed.SaintsRow2.Helpers\Gibbed.SaintsRow2.Helpers.csproj">
+      <Project>{CC72B954-00C2-4399-A8DD-D30C198FFE1C}</Project>
+      <Name>Gibbed.SaintsRow2.Helpers</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

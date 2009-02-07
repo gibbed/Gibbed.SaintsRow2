@@ -64,5 +64,56 @@ namespace Gibbed.SaintsRow2.Helpers
 							  (0xFF00000000000000) & (value << 56));
 			return swapped;
 		}
+
+		public static int Align(this int value, int align)
+		{
+			if (value == 0)
+			{
+				return value;
+			}
+
+			int left = value % align;
+
+			if (left > 0)
+			{
+				return value + (align - left);
+			}
+
+			return value;
+		}
+
+		public static uint Align(this uint value, uint align)
+		{
+			if (value == 0)
+			{
+				return value;
+			}
+
+			uint left = value % align;
+
+			if (left > 0)
+			{
+				return value + (align - left);
+			}
+
+			return value;
+		}
+
+		public static long Align(this long value, long align)
+		{
+			if (value == 0)
+			{
+				return value;
+			}
+
+			long left = value % align;
+
+			if (left > 0)
+			{
+				return value + (align - left);
+			}
+
+			return value;
+		}
 	}
 }

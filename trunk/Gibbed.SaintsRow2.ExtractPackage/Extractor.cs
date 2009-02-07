@@ -124,7 +124,7 @@ namespace Gibbed.SaintsRow2.ExtractPackage
 
 				input.Seek(entry.Offset, SeekOrigin.Begin);
 
-				string outputName = Path.ChangeExtension(entry.Name, entry.Extension);
+				string outputName = entry.Name + "." + entry.Extension;
 				this.Log(outputName);
 
 				Stream output = File.OpenWrite(Path.Combine(info.Save, outputName));
