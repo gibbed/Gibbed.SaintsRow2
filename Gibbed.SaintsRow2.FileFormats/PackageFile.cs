@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,8 +17,14 @@ namespace Gibbed.SaintsRow2.FileFormats
 		[FieldOffset(4)]
 		public uint Version;
 
+		[FieldOffset(0x14C)]
+		public uint Flags;
+
 		[FieldOffset(0x154)]
 		public int IndexCount;
+
+		[FieldOffset(0x158)]
+		public int PackageSize;
 
 		[FieldOffset(0x15C)]
 		public int IndexSize;
@@ -27,13 +34,17 @@ namespace Gibbed.SaintsRow2.FileFormats
 		
 		[FieldOffset(0x164)]
 		public int ExtensionsSize;
+
+		[FieldOffset(0x168)]
+		public int DataSize;
+
+		[FieldOffset(0x16C)]
+		public uint Unknown16C;
 	}
 
 	public class PackageEntry
 	{
-		public int NameOffset;
 		public string Name;
-		public int ExtensionOffset;
 		public string Extension;
 		public long Offset;
 		public int Size;
@@ -52,7 +63,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			this.Entries.Clear();
 
 			byte[] headerBuffer = new byte[384];
-			if (stream.Read2048(headerBuffer, 0, 384) != 384)
+			if (stream.ReadAligned(headerBuffer, 0, 384, 2048) != 384)
 			{
 				throw new NotAPackageException();
 			}
@@ -77,7 +88,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			// File Index
 			byte[] indexBuffer;
 			indexBuffer = new byte[header.IndexSize];
-			if (stream.Read2048(indexBuffer, 0, header.IndexSize) != header.IndexSize)
+			if (stream.ReadAligned(indexBuffer, 0, header.IndexSize, 2048) != header.IndexSize)
 			{
 				throw new PackageFileException();
 			}
@@ -85,7 +96,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			// Names
 			byte[] namesBuffer;
 			namesBuffer = new byte[header.NamesSize];
-			if (stream.Read2048(namesBuffer, 0, header.NamesSize) != header.NamesSize)
+			if (stream.ReadAligned(namesBuffer, 0, header.NamesSize, 2048) != header.NamesSize)
 			{
 				throw new PackageFileException();
 			}
@@ -93,7 +104,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			// Extensions
 			byte[] extensionsBuffer;
 			extensionsBuffer = new byte[header.ExtensionsSize];
-			if (stream.Read2048(extensionsBuffer, 0, header.ExtensionsSize) != header.ExtensionsSize)
+			if (stream.ReadAligned(extensionsBuffer, 0, header.ExtensionsSize, 2048) != header.ExtensionsSize)
 			{
 				throw new PackageFileException();
 			}
@@ -107,16 +118,16 @@ namespace Gibbed.SaintsRow2.FileFormats
 				int offset = i * 28; // Each index entry is 28 bytes long
 				byte[] index = new byte[28];
 
-				entry.NameOffset		= BitConverter.ToInt32 (indexBuffer, offset + 0x00);
-				entry.ExtensionOffset	= BitConverter.ToInt32 (indexBuffer, offset + 0x04);
+				int nameOffset			= BitConverter.ToInt32 (indexBuffer, offset + 0x00);
+				int extensionOffset		= BitConverter.ToInt32 (indexBuffer, offset + 0x04);
 				entry.Unknown08			= BitConverter.ToUInt32(indexBuffer, offset + 0x08);
 				entry.Offset			= BitConverter.ToInt32 (indexBuffer, offset + 0x0C) + baseOffset;
 				entry.Size				= BitConverter.ToInt32 (indexBuffer, offset + 0x10);
 				entry.Unknown14			= BitConverter.ToUInt32(indexBuffer, offset + 0x14);
 				entry.Unknown1C			= BitConverter.ToUInt32(indexBuffer, offset + 0x18);
 
-				entry.Name = namesBuffer.GetASCIIZ(entry.NameOffset);
-				entry.Extension = extensionsBuffer.GetASCIIZ(entry.ExtensionOffset);
+				entry.Name = namesBuffer.GetASCIIZ(nameOffset);
+				entry.Extension = extensionsBuffer.GetASCIIZ(extensionOffset);
 
 				if (entry.Unknown08 != 0 || entry.Unknown14 != 0xFFFFFFFF || entry.Unknown1C != 0)
 				{
@@ -129,7 +140,90 @@ namespace Gibbed.SaintsRow2.FileFormats
 
 		public void Write(Stream stream)
 		{
-			throw new NotImplementedException();
+			MemoryStream memory;
+
+			PackageHeader header = new PackageHeader();
+			header.Magic = 0x51890ACE;
+			header.Version = 4; // this.Version
+			header.Unknown16C = 0xFFFFFFFF;
+			header.Flags = 2; // I think this flag means 'preload' or something of that sort. Patch has it set at least.
+
+			List<string> names = new List<string>();
+			List<string> extensions = new List<string>();
+			Dictionary<string, int> nameOffsets = new Dictionary<string, int>();
+			Dictionary<string, int> extensionOffsets = new Dictionary<string, int>();
+
+			foreach (PackageEntry entry in this.Entries)
+			{
+				if (names.Contains(entry.Name) == false)
+				{
+					names.Add(entry.Name);
+				}
+
+				if (extensions.Contains(entry.Extension) == false)
+				{
+					extensions.Add(entry.Extension);
+				}
+			}
+
+			names.Sort();
+			extensions.Sort();
+
+			memory = new MemoryStream();
+			foreach (string name in names)
+			{
+				nameOffsets[name] = (int)memory.Position;
+				memory.WriteASCIIZ(name);
+			}
+			header.NamesSize = (int)memory.Length;
+			byte[] namesBuffer = memory.GetBuffer();
+
+			memory = new MemoryStream();
+			foreach (string extension in extensions)
+			{
+				extensionOffsets[extension] = (int)memory.Position;
+				memory.WriteASCIIZ(extension);
+			}
+			header.ExtensionsSize = (int)memory.Length;
+			byte[] extensionsBuffer = memory.GetBuffer();
+
+			int totalSize = 0;
+			memory = new MemoryStream();
+			foreach (PackageEntry entry in this.Entries)
+			{
+				memory.WriteS32(nameOffsets[entry.Name]);
+				memory.WriteS32(extensionOffsets[entry.Extension]);
+				memory.WriteU32(entry.Unknown08);
+				memory.WriteU32((uint)entry.Offset);
+				memory.WriteS32(entry.Size);
+				memory.WriteU32(entry.Unknown14);
+				memory.WriteU32(entry.Unknown1C);
+				totalSize += (int)entry.Size.Align(16);
+			}
+			header.IndexSize = (int)memory.Length;
+			byte[] indexBuffer = memory.GetBuffer();
+
+			header.IndexCount = this.Entries.Count;
+
+			header.DataSize = totalSize;
+
+			totalSize += 2048; // header
+			totalSize += header.IndexSize.Align(2048); // index
+			totalSize += header.NamesSize.Align(2048); // names
+			totalSize += header.ExtensionsSize.Align(2048); // extensions
+
+			header.PackageSize = totalSize;
+
+			int headerSize = Marshal.SizeOf(typeof(PackageHeader));
+			byte[] headerBuffer = new byte[headerSize];
+			GCHandle headerHandle = GCHandle.Alloc(headerBuffer, GCHandleType.Pinned);
+			Marshal.StructureToPtr(header, headerHandle.AddrOfPinnedObject(), false);
+			headerHandle.Free();
+
+			stream.WriteAligned(headerBuffer, 0, headerBuffer.Length, 2048);
+			stream.WriteAligned(indexBuffer, 0, header.IndexSize, 2048);
+			stream.WriteAligned(namesBuffer, 0, header.NamesSize, 2048);
+			stream.WriteAligned(extensionsBuffer, 0, header.ExtensionsSize, 2048);
 		}
 	}
 }
