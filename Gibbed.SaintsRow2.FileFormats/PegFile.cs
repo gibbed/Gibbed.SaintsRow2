@@ -27,12 +27,12 @@ namespace Gibbed.SaintsRow2.FileFormats
 
 			if (stream.ReadU32() != 0x564B4547)
 			{
-				throw new NotAPegException("header must be GEKV");
+				throw new NotAPegFileException("header must be GEKV");
 			}
 
 			if (stream.ReadU32() != 10)
 			{
-				throw new UnsupportedPackageVersionException("only version 10 is supported");
+				throw new UnsupportedPackageFileVersionException("only version 10 is supported");
 			}
 
 			this.FileSize = stream.ReadU32();

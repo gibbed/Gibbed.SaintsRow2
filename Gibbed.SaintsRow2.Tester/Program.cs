@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Gibbed.SaintsRow2.Helpers;
 using Gibbed.SaintsRow2.FileFormats;
 
 namespace Gibbed.SaintsRow2.Tester
@@ -25,9 +26,10 @@ namespace Gibbed.SaintsRow2.Tester
 			StringsFile = new LeStringsFile();
 			StringsFile.Read(stream);
 			stream.Close();
-			Console.WriteLine(StringsFile.Strings["WRATH_OF_GOD".KeyCRC32()]);
+			Console.WriteLine(StringsFile.Strings["DROP_DESTINY".KeyCRC32()]);
 			*/
 
+			/*
 			// Check if my created vpp is correct :)
 			Stream stream;
 
@@ -59,7 +61,16 @@ namespace Gibbed.SaintsRow2.Tester
 					Console.WriteLine("{0}: {1} vs {2}", name, patch_sizes[name], test_sizes[name]);
 				}
 			}
+			*/
 
+			// Test reading of vint_doc
+			foreach (string path in Directory.GetFiles(".", "*.vint_doc"))
+			{
+				FileStream stream = File.OpenRead(path);
+				VintFile vintFile = new VintFile();
+				vintFile.Read(stream);
+				stream.Close();
+			}
 		}
 
 		private static SortedDictionary<string, long> GetSizes(PackageFile package, long totalSize)
