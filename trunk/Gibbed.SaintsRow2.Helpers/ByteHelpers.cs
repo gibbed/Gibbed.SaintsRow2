@@ -40,5 +40,10 @@ namespace Gibbed.SaintsRow2.Helpers
 
 			return Encoding.ASCII.GetString(data, offset, i - offset);
 		}
+
+		public static string GetASCIIZ(this byte[] data, uint offset)
+		{
+			return data.GetASCIIZ((int)offset);
+		}
 	}
 }

@@ -56,9 +56,10 @@ namespace Gibbed.SaintsRow2.BuildPackage
 				}
 			}
 
-			foreach (string name in paths.Keys)
+			foreach (KeyValuePair<string, string> value in paths)
 			{
-				string path = paths[name];
+				string name = value.Key;
+				string path = value.Value;
 
 				MyPackageEntry entry = new MyPackageEntry();
 				entry.FileStream = File.OpenRead(path);

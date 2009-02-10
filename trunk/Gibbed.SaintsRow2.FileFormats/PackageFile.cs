@@ -63,7 +63,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			byte[] headerBuffer = new byte[384];
 			if (stream.ReadAligned(headerBuffer, 0, 384, 2048) != 384)
 			{
-				throw new NotAPackageException();
+				throw new NotAPackageFileException();
 			}
 
 			PackageHeader header = (PackageHeader)headerBuffer.BytesToStructure(typeof(PackageHeader));
@@ -71,17 +71,15 @@ namespace Gibbed.SaintsRow2.FileFormats
 			// Magic
 			if (header.Magic != 0x51890ACE)
 			{
-				throw new NotAPackageException();
+				throw new NotAPackageFileException();
 			}
 
 			if (header.Version != 4)
 			{
-				throw new UnsupportedPackageVersionException();
+				throw new UnsupportedPackageFileVersionException();
 			}
 
 			this.Version = header.Version;
-
-			int bufferSize;
 
 			// File Index
 			byte[] indexBuffer;
