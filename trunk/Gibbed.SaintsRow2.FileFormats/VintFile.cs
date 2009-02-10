@@ -408,7 +408,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 					string propertyName = VintPropertyNames.Lookup(hash);
 					if (this.Overrides[overrideName].ContainsKey(propertyName))
 					{
-						throw new Exception("duplicate override name");
+						throw new Exception("duplicate override property name");
 					}
 					this.Overrides[overrideName][propertyName] = this.GetProperty(stream, propertyType);
 					this.Overrides[overrideName][propertyName].Read(stream, vint);
@@ -428,7 +428,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 				string propertyName = VintPropertyNames.Lookup(hash);
 				if (this.Baseline.ContainsKey(propertyName))
 				{
-					throw new Exception("duplicate override name");
+					throw new Exception("duplicate baseline property name");
 				}
 				this.Baseline[propertyName] = this.GetProperty(stream, propertyType);
 				this.Baseline[propertyName].Read(stream, vint);
