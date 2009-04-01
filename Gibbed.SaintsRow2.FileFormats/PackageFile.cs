@@ -34,10 +34,10 @@ namespace Gibbed.SaintsRow2.FileFormats
 		public int ExtensionsSize;
 
 		[FieldOffset(0x168)]
-		public int DataSize;
+		public int UncompressedDataSize;
 
 		[FieldOffset(0x16C)]
-		public uint Unknown16C;
+		public uint CompressedDataSize;
 	}
 
 	public class PackageEntry
@@ -45,9 +45,9 @@ namespace Gibbed.SaintsRow2.FileFormats
 		public string Name;
 		public string Extension;
 		public long Offset;
-		public int Size;
+		public int UncompressedSize;
 		public uint Unknown08;
-		public uint Unknown14;
+		public int CompressedSize;
 		public uint Unknown1C;
 	}
 
@@ -68,8 +68,28 @@ namespace Gibbed.SaintsRow2.FileFormats
 
 			PackageHeader header = (PackageHeader)headerBuffer.BytesToStructure(typeof(PackageHeader));
 
+			bool bigEndian;
+
 			// Magic
-			if (header.Magic != 0x51890ACE)
+			if (header.Magic == 0x51890ACE)
+			{
+				bigEndian = false;
+			}
+			else if (header.Magic == 0xCE0A8951)
+			{
+				bigEndian = true;
+
+				header.Version = header.Version.Swap();
+				header.Flags = header.Flags.Swap();
+				header.IndexCount = header.IndexCount.Swap();
+				header.PackageSize = header.PackageSize.Swap();
+				header.IndexSize = header.IndexSize.Swap();
+				header.NamesSize = header.NamesSize.Swap();
+				header.ExtensionsSize = header.ExtensionsSize.Swap();
+				header.UncompressedDataSize = header.UncompressedDataSize.Swap();
+				header.CompressedDataSize = header.CompressedDataSize.Swap();
+			}
+			else
 			{
 				throw new NotAPackageFileException();
 			}
@@ -114,18 +134,52 @@ namespace Gibbed.SaintsRow2.FileFormats
 				int offset = i * 28; // Each index entry is 28 bytes long
 				byte[] index = new byte[28];
 
-				int nameOffset			= BitConverter.ToInt32 (indexBuffer, offset + 0x00);
-				int extensionOffset		= BitConverter.ToInt32 (indexBuffer, offset + 0x04);
-				entry.Unknown08			= BitConverter.ToUInt32(indexBuffer, offset + 0x08);
-				entry.Offset			= BitConverter.ToInt32 (indexBuffer, offset + 0x0C) + baseOffset;
-				entry.Size				= BitConverter.ToInt32 (indexBuffer, offset + 0x10);
-				entry.Unknown14			= BitConverter.ToUInt32(indexBuffer, offset + 0x14);
-				entry.Unknown1C			= BitConverter.ToUInt32(indexBuffer, offset + 0x18);
+				int nameOffset;
+				int extensionOffset;
+
+				if (bigEndian == false)
+				{
+					nameOffset				= BitConverter.ToInt32 (indexBuffer, offset + 0x00);
+					extensionOffset			= BitConverter.ToInt32 (indexBuffer, offset + 0x04);
+					entry.Unknown08			= BitConverter.ToUInt32(indexBuffer, offset + 0x08);
+					entry.Offset			= BitConverter.ToInt32 (indexBuffer, offset + 0x0C);// + baseOffset;
+					entry.UncompressedSize	= BitConverter.ToInt32 (indexBuffer, offset + 0x10);
+					entry.CompressedSize	= BitConverter.ToInt32 (indexBuffer, offset + 0x14);
+					entry.Unknown1C			= BitConverter.ToUInt32(indexBuffer, offset + 0x18);
+				}
+				else
+				{
+					nameOffset				= BitConverter.ToInt32 (indexBuffer, offset + 0x00).Swap();
+					extensionOffset			= BitConverter.ToInt32 (indexBuffer, offset + 0x04).Swap();
+					entry.Unknown08			= BitConverter.ToUInt32(indexBuffer, offset + 0x08).Swap();
+					entry.Offset			= BitConverter.ToInt32 (indexBuffer, offset + 0x0C).Swap();
+					entry.UncompressedSize	= BitConverter.ToInt32 (indexBuffer, offset + 0x10).Swap();
+					entry.CompressedSize	= BitConverter.ToInt32 (indexBuffer, offset + 0x14).Swap();
+					entry.Unknown1C			= BitConverter.ToUInt32(indexBuffer, offset + 0x18).Swap();
+				}
+
+				// package is compressed with zlib, offsets are not correct, fix 'em
+				// compression occurs in the 360 version of Saints Row 2 packages
+				// this should work (I hope)
+				if ((header.Flags & 1) == 1)
+				{
+					entry.Offset = baseOffset;
+					baseOffset += entry.CompressedSize.Align(2048);
+				}
+				else
+				{
+					entry.Offset += baseOffset;
+				}
 
 				entry.Name = namesBuffer.GetASCIIZ(nameOffset);
 				entry.Extension = extensionsBuffer.GetASCIIZ(extensionOffset);
 
-				if (entry.Unknown08 != 0 || entry.Unknown14 != 0xFFFFFFFF || entry.Unknown1C != 0)
+				if (entry.Unknown08 != 0 || entry.Unknown1C != 0)
+				{
+					throw new Exception();
+				}
+
+				if ((header.Flags & 1) != 1 && entry.CompressedSize != -1)
 				{
 					throw new Exception();
 				}
@@ -141,7 +195,7 @@ namespace Gibbed.SaintsRow2.FileFormats
 			PackageHeader header = new PackageHeader();
 			header.Magic = 0x51890ACE;
 			header.Version = 4; // this.Version
-			header.Unknown16C = 0xFFFFFFFF;
+			header.CompressedDataSize = 0xFFFFFFFF;
 			header.Flags = 2; // I think this flag means 'preload' or something of that sort. Patch has it set at least.
 
 			List<string> names = new List<string>();
@@ -191,17 +245,17 @@ namespace Gibbed.SaintsRow2.FileFormats
 				memory.WriteS32(extensionOffsets[entry.Extension]);
 				memory.WriteU32(entry.Unknown08);
 				memory.WriteU32((uint)entry.Offset);
-				memory.WriteS32(entry.Size);
-				memory.WriteU32(entry.Unknown14);
+				memory.WriteS32(entry.UncompressedSize);
+				memory.WriteS32(entry.CompressedSize);
 				memory.WriteU32(entry.Unknown1C);
-				totalSize += (int)entry.Size.Align(16);
+				totalSize += (int)entry.UncompressedSize.Align(16);
 			}
 			header.IndexSize = (int)memory.Length;
 			byte[] indexBuffer = memory.GetBuffer();
 
 			header.IndexCount = this.Entries.Count;
 
-			header.DataSize = totalSize;
+			header.UncompressedDataSize = totalSize;
 
 			totalSize += 2048; // header
 			totalSize += header.IndexSize.Align(2048); // index

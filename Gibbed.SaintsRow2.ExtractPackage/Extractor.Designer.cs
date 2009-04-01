@@ -85,7 +85,8 @@
 			// openFileDialog
 			// 
 			this.openFileDialog.DefaultExt = "vpp_pc";
-			this.openFileDialog.Filter = "PC Package Files (*.vpp_pc)|*.vpp_pc|All Files (*.*)|*.*";
+			this.openFileDialog.Filter = "Package Files (*.vpp_*)|*.vpp_*|PC Package Files (*.vpp_pc)|*.vpp_pc|XBOX 360 Pac" +
+				"kage Files (*.vpp_xbox2)|*.vpp_xbox2|All Files (*.*)|*.*";
 			// 
 			// savePathDialog
 			// 

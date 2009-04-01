@@ -129,14 +129,46 @@ namespace Gibbed.SaintsRow2.ExtractPackage
 
 				Stream output = File.OpenWrite(Path.Combine(info.Save, outputName));
 
-				long left = entry.Size;
-				byte[] data = new byte[4096];
-				while (left > 0)
+				if (entry.CompressedSize == -1)
 				{
-					int block = (int)(Math.Min(left, 4096));
-					input.Read(data, 0, block);
-					output.Write(data, 0, block);
-					left -= block;
+					long left = entry.UncompressedSize;
+					byte[] data = new byte[4096];
+					while (left > 0)
+					{
+						int block = (int)(Math.Min(left, 4096));
+						input.Read(data, 0, block);
+						output.Write(data, 0, block);
+						left -= block;
+					}
+				}
+				else
+				{
+					ICSharpCode.SharpZipLib.Zip.Compression.Inflater inflater =
+						new ICSharpCode.SharpZipLib.Zip.Compression.Inflater();
+
+					// compressed using zlib
+					long left = entry.CompressedSize;
+					byte[] compressedData = new byte[4096];
+					byte[] data = new byte[4096];
+
+					while (inflater.TotalOut < entry.UncompressedSize)
+					{
+						if (inflater.IsNeedingInput == true)
+						{
+							if (left == 0)
+							{
+								throw new Exception();
+							}
+
+							int block = (int)(Math.Min(left, 4096));
+							input.Read(compressedData, 0, block);
+							inflater.SetInput(compressedData, 0, block);
+							left -= block;
+						}
+
+						int inflated = inflater.Inflate(data);
+						output.Write(data, 0, inflated);
+					}
 				}
 
 				output.Close();

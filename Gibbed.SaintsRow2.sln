@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.SaintsRow2.ConvertPe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.SaintsRow2.ConvertVintDoc", "Gibbed.SaintsRow2.ConvertVintDoc\Gibbed.SaintsRow2.ConvertVintDoc.csproj", "{2496E504-FA12-415F-A6C0-D9DD6FB0B66C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gibbed.SaintsRow2.XmlTable", "Gibbed.SaintsRow2.XmlTable\Gibbed.SaintsRow2.XmlTable.csproj", "{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,16 @@ Global
 		{2496E504-FA12-415F-A6C0-D9DD6FB0B66C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2496E504-FA12-415F-A6C0-D9DD6FB0B66C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2496E504-FA12-415F-A6C0-D9DD6FB0B66C}.Release|x86.ActiveCfg = Release|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
