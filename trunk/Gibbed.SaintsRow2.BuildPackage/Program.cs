@@ -68,9 +68,9 @@ namespace Gibbed.SaintsRow2.BuildPackage
 				entry.Extension = Path.GetExtension(name).Substring(1);
 
 				entry.Offset = offset;
-				entry.Size = (int)entry.FileStream.Length;
+				entry.UncompressedSize = (int)entry.FileStream.Length;
 				entry.Unknown08 = 0;
-				entry.Unknown14 = 0xFFFFFFFF;
+				entry.CompressedSize = -1;
 				entry.Unknown1C = 0;
 
 				files[name] = entry;
@@ -89,7 +89,7 @@ namespace Gibbed.SaintsRow2.BuildPackage
 
 			foreach (MyPackageEntry entry in package.Entries)
 			{
-				long size = entry.Size;
+				long size = entry.UncompressedSize;
 				while (size > 0)
 				{
 					byte[] block = new byte[2048];
@@ -104,7 +104,7 @@ namespace Gibbed.SaintsRow2.BuildPackage
 					size -= read;
 				}
 
-				long align = entry.Size.Align(16) - entry.Size;
+				long align = entry.UncompressedSize.Align(16) - entry.UncompressedSize;
 				if (align > 0)
 				{
 					byte[] block = new byte[align];

@@ -57,6 +57,10 @@
       <Project>{CC72B954-00C2-4399-A8DD-D30C198FFE1C}</Project>
       <Name>Gibbed.SaintsRow2.Helpers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Gibbed.SaintsRow2.XmlTable\Gibbed.SaintsRow2.XmlTable.csproj">
+      <Project>{EEB2BFCD-6BFF-4301-B135-4C5C4FF82190}</Project>
+      <Name>Gibbed.SaintsRow2.XmlTable</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Gibbed.SaintsRow2.Helpers;
 using Gibbed.SaintsRow2.FileFormats;
+using Gibbed.SaintsRow2.XmlTable;
 
 namespace Gibbed.SaintsRow2.Tester
 {
@@ -63,12 +64,22 @@ namespace Gibbed.SaintsRow2.Tester
 			}
 			*/
 
+			/*
 			// Test reading of vint_doc
 			foreach (string path in Directory.GetFiles(".", "*.vint_doc"))
 			{
 				FileStream stream = File.OpenRead(path);
 				VintFile vintFile = new VintFile();
 				vintFile.Read(stream);
+				stream.Close();
+			}
+			*/
+
+			foreach (string path in Directory.GetFiles("extracted\\common", "*.xtbl"))
+			{
+				Stream stream = File.OpenRead(path);
+				SerializationBuilder builder = new SerializationBuilder();
+				builder.ReadXmlTable(stream);
 				stream.Close();
 			}
 		}
